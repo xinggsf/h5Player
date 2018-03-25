@@ -1,0 +1,102 @@
+{
+  "manifest_version": 2,
+  "name": "星光HTML5播放器",
+  "description": "支持站点：CCTV、网易[公开课、视频、(青果)直播]、芒果TV、战旗直播。屏蔽视频广告",
+  "version": "1.2.1.1",
+  "content_scripts": [
+    {
+      "matches": [
+        "http://tv.cntv.cn/video/*",
+        "http://*.cctv.com/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "util.js",
+        "lib/clappr.min.js",
+        "lib/level-selector.min.js",
+        "base.js",
+        "cctv_h5.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "*://open.163.com/movie/20*_*.html*"
+      ],
+      "all_frames": false,
+      "js": [
+        "util.js",
+        "hookFetch.js",
+        "lib/clappr.min.js",
+        "base.js",
+        "163.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://v.163.com/*",
+        "*://live.163.com/room/*",
+        "https://qlive.163.com/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "util.js",
+        "hookFetch.js",
+        "lib/clappr.min.js",
+        "base.js",
+        "v163.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://*.zhanqi.tv/*"
+      ],
+      "all_frames": false,
+      "js": [
+        "util.js",
+        "hookFetch.js",
+        "lib/clappr.min.js",
+        "lib/level-selector.min.js",
+        "base.js",
+        "zhanqi.js"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://www.mgtv.com/*.html*"
+      ],
+      "all_frames": false,
+      "js": [
+        "util.js",
+        "lib/clappr.min.js",
+        "base.js",
+        "m3u8.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": [
+      "hookFetch_background.js"
+    ],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "*://*/*"
+    ,"tabs"
+    ,"webRequest"
+    ,"webRequestBlocking"
+    ,"storage"
+  ],
+  "icons": {
+    "48": "icon.png"
+  },
+  "default_locale": "en",
+  "minimum_chrome_version": "49.0"
+}
