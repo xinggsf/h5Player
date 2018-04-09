@@ -57,7 +57,7 @@ position:absolute;bottom:0;left:0;right:0;font-size:15px
 	}
 
 	run() {
-		browser.runtime.sendMessage({
+		webExt.runtime.sendMessage({
 			icon: true,
 			state: 'playing'
 		});

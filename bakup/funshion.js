@@ -66,8 +66,8 @@ class Funshion extends Site {
 			if (json.status !== 200) throw 'API地址失效，请向扩展开发者反馈';
 			json.data.files.forEach(k => {
 				//k.clarity 为清晰度： sdvd, hd, dvd, tv
-			}
-		})
+			});
+		});
 	}
 	//剧集取信息
 	fetchDramaInfo() {

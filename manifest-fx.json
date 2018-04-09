@@ -1,8 +1,15 @@
 {
+  "applications": {
+    "gecko": {
+      "id": "star-ray-h5@xinggsf.net",
+      "strict_min_version": "52.0"
+    }
+  },
+  "author": "xinggsf",
   "manifest_version": 2,
-  "name": "星光HTML5播放器",
-  "description": "支持站点：CCTV、网易[公开课、视频、(青果)直播]、芒果TV、战旗直播。屏蔽视频广告",
-  "version": "1.2.1.2",
+  "name": "__MSG_extName__",
+  "description": "__MSG_extDesc__",
+  "version": "1.3.0.1",
   "content_scripts": [
     {
       "matches": [
@@ -26,7 +33,6 @@
       "all_frames": false,
       "js": [
         "util.js",
-        "hookFetch.js",
         "lib/clappr.min.js",
         "base.js",
         "163.js"
@@ -42,7 +48,6 @@
       "all_frames": false,
       "js": [
         "util.js",
-        "hookFetch.js",
         "lib/clappr.min.js",
         "base.js",
         "v163.js"
@@ -56,7 +61,6 @@
       "all_frames": false,
       "js": [
         "util.js",
-        "hookFetch.js",
         "lib/clappr.min.js",
         "lib/level-selector.min.js",
         "base.js",
@@ -97,6 +101,5 @@
   "icons": {
     "48": "icon.png"
   },
-  "default_locale": "en",
-  "minimum_chrome_version": "47.0"
+  "default_locale": "en"
 }

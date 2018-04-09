@@ -20,13 +20,20 @@ class Netease extends Site {
 		this.subs = {};
 		this.hls = null;
 		this.subtitleNum = 0;
+		document.head.append(_('style', {}, [_('text', `
+		::cue {
+			color: #ACF;
+			background: transparent;
+			text-shadow: black 0 0 0.2em;
+			font: 1.1em sans-serif;
+		}`)]));
 	}
 
 	run() {
 		this.getOpenCourseSource();
 		if (this.mid) {
 			super.run();
-			browser.runtime.onMessage.addListener((message, sender) => {
+			webExt.runtime.onMessage.addListener((message, sender) => {
 				switch (message.id) {
 				case 'm3u8-url':
 					log('flv url:', message.url);
@@ -70,7 +77,7 @@ class Netease extends Site {
 			for (let sub of subs) {
 				let subName, b, s = sub.querySelector('name').innerHTML;
 				b = encodeURIComponent(s).startsWith('%D3');//GBK“英文”的转码
-				subName = b ? 'english' : '中文';
+				subName = b ? 'en' : 'zh-cn';
 				this.subs[subName] = sub.querySelector('url').innerHTML;
 				log(subName, this.subs[subName]);
 				this.toWEBVTT(subName);
@@ -132,79 +139,42 @@ class Netease extends Site {
 
 	createH5Player() {
 		log('createH5Player() -- url: ', this.curUrl);
-		const e = this.flashplayer,
-		cfg = {
+		const a = [], e = this.flashplayer;
+		if (this.subtitleNum > 0) {
+			// 设置字幕文本轨道TextTrack
+			for (let i in this.subs) {
+				if (!this.subs[i].startsWith('blob:')){
+					setTimeout(this.createH5Player.bind(this), 99);
+					return;
+				}
+				a.push({
+					lang: i,
+					label: i === 'en' ? 'english' : '中文',
+					src: this.subs[i]
+				});
+			}
+		}
+		this.hls = new Clappr.Player({
 			source: this.curUrl, //makeM3u8(this.videos),
 			autoPlay: true,
 			width: '100%',
 			height: '100%',
-			parentId: '#j-flashArea'
-		};
-		if (this.subtitleNum > 0) {
-			cfg.events = { onReady: this.onSetSubtitles.bind(this) };
-			/*
-			let i, lang, a = [];//字幕: text track
-			for (i in this.subs) {
-				//if (!url.startsWith('blob:')) return;
-				//setTimeout(() => URL.revokeObjectURL(url), 900);
-				lang = i === 'english' ? 'en' : 'cn-zh';
-				a.push({
-					lang: lang,
-					label: i,
-					src: this.subs[i],
-					kind: 'subtitles'
-				});
-			}
-			cfg.playback = {
+			parentId: '#j-flashArea',
+			closedCaptionsConfig: {
+				//title: '字幕', // default is none
+				//ariaLabel: '字幕', // Default is 'cc-button'
+				labelCallback: track => track.name // track is an object with id, name and track properties (track is TextTrack object)
+			},
+			playback: {
 				preload: 'metadata',
 				//controls: true,
-				//playInline: true, // allows inline playback when running on iOS UIWebview
+				playInline: true, // allows inline playback when running on iOS UIWebview
 				//crossOrigin: 'use-credentials',
-				//recycleVideo: Clappr.Browser.isMobile, // Recycle <video> element only for mobile. (default is false)
-				// Add external <track> (if supported by browser, see also https://www.w3.org/TR/html5/embedded-content-0.html#the-track-element)
+				// Add external <track> (if supported by webExt, see also https://www.w3.org/TR/html5/embedded-content-0.html#the-track-element)
 				externalTracks: a
-			};
-			cfg.closedCaptionsConfig = {
-				title: '字幕', //Subtitles, default is none
-				ariaLabel: '关闭字幕', //Closed Captions, Default is 'cc-button'
-				labelCallback: function (track) { return track.name }, // track is an object with id, name and track properties (track is TextTrack object)
-			}; */
-		}
-		this.hls = new Clappr.Player(cfg);
+			}
+		});
 		e && e.remove();
-	}
-
-	onSetSubtitles() {
-		log('onSetSubtitles start -- ');
-		const v = $('video')[0];
-		let html = '';
-		for (let i in this.subs) {
-			let url = this.subs[i];
-			if (!url.startsWith('blob:')) {
-				setTimeout(this.onSetSubtitles.bind(this), 99);
-				return;
-			}
-			//setTimeout(() => URL.revokeObjectURL(url), 900);
-			let lang = i === 'english' ? 'en' : 'cn-zh';
-			html = `${html}<track kind="subtitles" label="${i}" src="${url}" srclang="${lang}" default>`;
-		}
-		v.parentNode.insertBefore(_('style', {}, [_('text',
-		`::cue {
-			color: #ACF;
-			background: transparent;
-			text-shadow: black 0 0 0.2em;
-			font: 1.1em sans-serif;
-		}`)]), v);
-		v.innerHTML += html;
-		setTimeout(() => {
-			let x = v.textTracks;
-			URL.revokeObjectURL(x[0].src);
-			if (this.subtitleNum>1) {
-				x[1].mode = 'showing';//disabled,hidden
-				setTimeout(() => URL.revokeObjectURL(x[1].src), 99);
-			}
-		}, 99);
-		log(html);
 	}
 
 	_findCallback(k) {

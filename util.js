@@ -1,6 +1,6 @@
-const browser = chrome;
+const webExt = window.chrome || browser,
 //生成主M3u8文件，并返回blob地址
-const makeM3u8 = urls => {
+makeM3u8 = urls => {
 	let a = ['#EXTM3U'];
 	const videos = {
 		ld: '\n#EXT-X-STREAM-INF:PROGRAM-ID=1, BANDWIDTH=204800, RESOLUTION=320x180\n',
@@ -16,13 +16,11 @@ const makeM3u8 = urls => {
 	const url = URL.createObjectURL(a);
 	//setTimeout(() => URL.revokeObjectURL(url), 3300);
 	return url;
-}
-
-const getRandom = a => {
+},
+getRandom = a => {
 	return Array.isArray(a) ? a[getRandom(a.length)] : Math.random()*a |0;
-}
-
-const _ = function (type, props, children) {
+},
+_ = function (type, props, children) {
 	if (type === "text") {
 		return document.createTextNode(props);
 	}
@@ -58,21 +56,21 @@ String.prototype.r1 = function(r) {
 	return r.test(this) && RegExp.$1;
 };
 const isChrome = navigator.userAgent.includes('Chrome');
-const _t = s => browser.i18n.getMessage(s);
+const _t = s => webExt.i18n.getMessage(s);
 const firefoxVer = !isChrome && navigator.userAgent.r1(/Firefox\/(\d+)/) || 0;
 
 function readStorage(name, cb) {
 	if (!isChrome && firefoxVer < 53)
 		//ff52-无sync
-		browser.storage.local.get(name, cb);
+		webExt.storage.local.get(name, cb);
 	else
-		browser.storage.sync.get(name, cb);
+		webExt.storage.sync.get(name, cb);
 }
 function saveStorage(save) {
 	if (!isChrome && firefoxVer < 53)
-		browser.storage.local.set(save);
+		webExt.storage.local.set(save);
 	else
-		browser.storage.sync.set(save);
+		webExt.storage.sync.set(save);
 }
 //由jQuery.cookie.js改写 http://blog.wpjam.com/m/jquery-cookies/
 function cookie(name, value, options) {
@@ -104,9 +102,4 @@ function cookie(name, value, options) {
 	document.cookie = s;
 }
 
-//const _log = console.log.bind(console);
-function log(...a) {
-	// let s = log.caller && log.caller.name || '';
-	// _log(s, ...a);
-	console.log(...a);
-}
+const log = console.log.bind(console);

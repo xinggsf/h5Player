@@ -1,7 +1,7 @@
 class M3u8 extends Site {
 	run() {
 		log('class M3u8.run() --');
-		browser.runtime.onMessage.addListener((message, sender) => {
+		webExt.runtime.onMessage.addListener((message, sender) => {
 			switch (message.id) {
 			case 'm3u8-url':
 				log(message.url);
@@ -26,4 +26,4 @@ class M3u8 extends Site {
 	}
 }
 
-(location.hostname === "www.mgtv.com")&& new M3u8().run();
+if (location.hostname === "www.mgtv.com") new M3u8().run();

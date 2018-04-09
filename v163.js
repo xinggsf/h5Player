@@ -11,7 +11,7 @@ class V163 extends Site {
 			p = $('.header-video')[0];
 		}
 		if (isObserver) {
-			console.log(p);
+			log(p);
 			this.observer = new MutationObserver(records => {
 				for (let r of records) if (r.addedNodes) {
 					for (let e of r.addedNodes) {

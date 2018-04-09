@@ -30,11 +30,16 @@ class Cctv extends Site {
 		this.vid = location.href.r1(/^http:\/\/tv\.cntv\.cn\/video\/\w+\/(\w+)/) ||
 			location.href.r1(/^http:\/\/xiyou\.cctv\.com\/\w\-([\w\-]+)\.html/);
 
-		if (!this.vid) for (let k of document.querySelectorAll('div>script:not([src])')) {
-			this.vid = k.textContent.r1(/var guid = "(\w+)"/) ||
-				k.textContent.r1(/videoCenterId","(\w+)"/);
-			if (this.vid) break;
+		if (!this.vid){
+			let c = $('div>script:not([src])');
+			c.each((i, e) => {
+				let s = $(e).text();
+				this.vid = s.r1(/var guid = "(\w+)"/) || s.r1(/"videoCenterId","(\w+)"/);
+				if (this.vid) return !1;
+			});
+			c.remove();
 		}
+
 		this.vid ? this.fetchSrc() : this._findFlash();
 	}
 
@@ -48,9 +53,9 @@ class Cctv extends Site {
 	}
 
 	run() {
-		this.levelLabels = {4: '1080P', 3: '超清', 2: '高清', 1: '标清',0: '渣清'};
+		this.levelLabels = {5: '2K', 4: '1080P', 3: '超清', 2: '高清', 1: '标清',0: '渣清'};
 		if (location.pathname.startsWith('/live/cctv')) {
-			browser.runtime.onMessage.addListener((message, sender) => {
+			webExt.runtime.onMessage.addListener((message, sender) => {
 				switch (message.id) {
 				case 'm3u8-url':
 					log('m3u8 url:', message.url);
@@ -65,6 +70,7 @@ class Cctv extends Site {
 	}
 
 	fetchSrc() {
+		log(this.vid);
 		fetch('http://vdn.apps.cntv.cn/api/getHttpVideoInfo.do?pid='+ this.vid)
 		.then(r => r.json())
 		.then(json => this.createH5Player(json.hls_url, '100%'))
@@ -72,17 +78,23 @@ class Cctv extends Site {
 	}
 
 	createH5Player(url, width) {
+		log(url);
 		if (this.hls) return;
-		let e = this.flashplayer;
+		let e;
+		if (this.flashplayer) {
+			e = this.flashplayer.parentNode;
+		} else {
+			e = $('#myFlash')[0];
+		}
+		$(e).empty().css('height', '100%')
+			.parent().css('height', '100%');
 		this.hls = new Clappr.Player({
 			source: url,
 			autoPlay: true,
-			width: width || e.width,
-			height: e.height || '100%',
-			parent: e.parentNode,
-			plugins: {
-				'core': [LevelSelector]
-			},
+			width: '100%',
+			height: '100%',
+			parent: e,
+			plugins: [LevelSelector],
 			levelSelectorConfig: {
 				labels:this.levelLabels
 				/*
@@ -92,7 +104,6 @@ class Cctv extends Site {
 				} */
 			}
 		});
-		e.remove();
 	}
 
 	openLiveHls(url) {
